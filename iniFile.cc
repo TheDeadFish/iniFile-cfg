@@ -320,9 +320,9 @@ void Ini_FieldInfo::readField(char*& str_, void* obj) const
 	int defVal = this->def(); if(defVal == -2) {
 		defVal <<= (size*8)-2; }
 
-	do { if(type2() == IniType_Uct) { auto* curPos = fi();
-		while(1) { curPos = curPos->next(); if(!curPos->
-			type()) break; curPos->readField(str_, obj); }
+	do { if(type2() == IniType_Uct) { auto* curPos = fi()+1;
+		while(1) {  if(!curPos->type()) break; curPos->
+			readField(str_, obj); curPos = curPos->next(); }
 		ini_uctEnd(str_); } else {
 		cstr str = ini_getStr(str_); 
 		switch(type2()) {
