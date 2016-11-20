@@ -1,22 +1,12 @@
+#include "stdshit.h"
 #include "iniFile.h"
 
-template <class T, class U, class V>
-bool inRng(T t, U u, V v) { return (t >= u)&&(t <= v); }
-template <class T, class U, class V>
-bool inRng1(T t, U u, V v) { return (t >= u)&&(t < v); }
+// stdshit candidates
 TMPL(T) std::make_unsigned_t<T> usn(T val) { return val; }
 TMPL2(T, ... U) ALWAYS_INLINE bool is_nulspc_or(const T& t, 
 	const U&... u) { return (usn(t) <= ' ')|| is_one_of(t,u...); }
-	
-//
 static inline bool isSpc(char ch) { return inRng(ch, 1, ' '); }
 static inline bool isNSpc(char ch) { return inRng(ch, 0, ' '); }
-
-
-
-
-
-	
 	
 // line parsing code
 cstr __stdcall getLine(char*& str) {
@@ -49,10 +39,6 @@ bool IniFile_Save::fmt(cch* fmt, size_t var) {
 	INIFSERH_( fprintf(fp, fmt, var)); }
 bool IniFile_Save::fmtf(cch* fmt, void* var) { 
 	INIFSERH_( fprintf(fp, fmt, RF(var))); }
-	
-	
-	
-	
 bool IniFile_Save::create(cch* file) {
 	fp = fopen(file, "w"); return (notErr = fp); }
 bool IniFile_Save::close() { if(fclose_ref(fp))
@@ -91,6 +77,7 @@ char* IniFile_Load::Block::
 	// search for block
 	Line* curPos = hint; INI_SFB_(lines, !strcmp,
 		hint_= (curPos-lines)+1; return curPos->value;);
+	return NULL;
 }
 
 IniFile_Load::Block* IniFile_Load::findBlock(cch* name)
@@ -115,8 +102,6 @@ char* IniFile_Load::getValue(cch* name) {
 	return blockHint->getValue(name, lineHint); }
 cstr IniFile_Load::dupValue(cch* name) { char* str = getValue
 	(name); if(!str) return {}; return xstrdup(str); }
-//cstr IniFile_Load::dupValue2(cch* name) { char* str = getValue(name);
-//	if(!str) return {}; return ini_dupStr(ini_getStr(str)); }
 
 int IniFile_Load::load(cch* fileName)
 {
@@ -340,7 +325,7 @@ void Ini_FieldInfo::readField(char*& str_, void* obj) const
 		if(str.data == endPtr) tmp = defVal; RW(obj) = tmp; break; }
 	case IniType_Int: { char* endPtr; int tmp = strtol(str, &endPtr, 10); 
 		if(str.data == endPtr) tmp = defVal; RI(obj) = tmp; break; }
-	case IniType_Hex: { char* endPtr; int tmp = strtol(str, &endPtr, 16);
+	case IniType_Hex: { char* endPtr; int tmp = strtoul(str, &endPtr, 16);
 		if(str.data == endPtr) tmp = defVal; RI(obj) = tmp; break; }
 	case IniType_Float: { char* endPtr; float tmp = strtod(str, &endPtr);
 		if(str.data == endPtr) { tmp = defVal; if(defVal==2) tmp = INFINITY;
@@ -368,5 +353,3 @@ void Ini_FieldInfo::readBlock(
 		}
 	}
 }
-
-

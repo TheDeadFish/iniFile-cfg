@@ -17,17 +17,6 @@ struct IniFile_Save
 	
 	bool fmt(cch* fmt, size_t var);
 	bool fmtf(cch* fmt, void* var);
-	
-	
-	
-	
-	// struct writing
-	/*void writeFields(Ini_FieldInfo* fi, void* obj);
-	void writeFields(Ini_FieldInfo* fi,
-		void* obj, int objSize, int objCount);
-	void block(cch* name, Ini_FieldInfo* fi);
-	void block(cch* name, Ini_FieldInfo* fi,
-		void* obj, int objSize, int objCount);*/
 };
 
 struct IniFile_Load 
@@ -49,39 +38,7 @@ struct IniFile_Load
 	cstr dupValue(cch* name);
 	cstr dupValue2(cch* name);
 	
-	/* field reading
-	void readField(cch* name, int type, int , void* obj);
-	void readField(cch* name, Ini_FieldInfo* fi, void* obj);
-	
-	
-	
-	
-	
-	void readField(cch* name, Ini_FieldInfo* fi, 
-		void* obj, int objSize, int objCount);
-		
-		
-		
-		
-	void readFields(Ini_FieldInfo* fi, void* obj);
-	void readBlock(cch* name, Ini_FieldInfo* fi, void* obj);
-	void readBlock(cch* name, Ini_FieldInfo* fi, 
-		void* obj, int objSize, int objCount);
-	*/
-	
-	
-		
-		
-	
-		
-	
-	
-	
-	
-	
-	
-	
-	
+	// construction
 	IniFile_Load() : fileData(0),
 		blocks(0), nBlocks(0) {}
 	~IniFile_Load() { free(); }
@@ -93,47 +50,41 @@ struct IniFile_Load
 // high level parsing
 __stdcall cstr ini_getStr(char*& curPos_);
 __stdcall void ini_uctEnd(char*& curPos_);
-
-
-
-
-
-
-
-
 #define INI_ENCSTR_(str) char* encStr = ini_encStr(\
 	str); SCOPE_EXIT(if(encStr != str) free(encStr));
-
-
-
-
-
-
 REGCALL(2) cstr ini_dupStr(cstr str);
 __stdcall char* ini_cpyStr(cstr src, char* dst);
 __stdcall char* ini_encStr(cch* str);
 
-
+// 
 enum { IniType_None, IniType_Bool, IniType_Byte, IniType_Word,
 	IniType_Int, IniType_Hex, IniType_Float, IniType_Str, 
 	IniType_FStr, IniType_Uct, IniType_Blk, IniType_Dyn = 0x10 };
+enum { IniDef_0 = 0, IniDef_N = 192, IniDef_8 = 128 };
 
 #define INI_DEFUCT(name, type, ...) typedef type TMPNAME(cfgType);  \
 	const Ini_FieldInfo name[] = {{0,sizeof(type),0}, __VA_ARGS__ {0,0,0}};
-#define INI_DEF0_(n,m,n2) {n, m, offsetof(TMPNAME(cfgType), n2)},
+#define INI_DEF0_(n,m,n2) {n, u16(m), offsetof(TMPNAME(cfgType), n2)},
 #define INI_DEF1_(n,t,t2,c,d) INI_DEF0_(#n, (MCAT(IniType_,t) \
-	|MCAT(IniType_,t2)|(c<<8)|(u8(d<<6))), n)
-#define INI_DS(n,t) INI_DEF1_(n,t,None,0,0)
-#define INI_DF(n,t,c) INI_DEF1_(n,t,None,c,0)
-#define INI_DS8(n,t) INI_DEF1_(n,t,None,0,-2)
-#define INI_DF8(n,t,c) INI_DEF1_(n,t,None,c,-2)
-#define INI_DSN(n,t) INI_DEF1_(n,t,None,0,-1)
-#define INI_DFN(n,t,c) INI_DEF1_(n,t,None,c,-1)
+	|MCAT(IniType_,t2)|(c<<8)|MCAT(IniDef_,d)), n)
 
-
-
+// basic types
+#define INI_DS_(d,n,t) INI_DEF1_(n,t,None,0,d)
+#define INI_DF_(d,n,t,c) INI_DEF1_(n,t,None,c,d)
+#define INI_DV_(d,n,t,l,m) INI_DEF1_(n,t,Dyn,0,d) INI_DEF0_(0, m, l)
 #define INI_DFB(n,c,s) INI_DEF1_(n,Blk,None,c,0) {(char*)s,0,0},
+#define INI_DFU(n,c,s) INI_DEF1_(n,Uct,None,c,0) {(char*)s,0,0},
+#define INI_DVB(n,l,m,s) INI_DEF1_(n,Blk,Dyn,0,0) INI_DEF0_((char*)s, m, l)
 #define INI_DVU(n,l,m,s) INI_DEF1_(n,Uct,Dyn,0,0) INI_DEF0_((char*)s, m, l)
+
+// derived types
+#define INI_DS(n,t) INI_DS_(0,n,t)
+#define INI_DF(n,t,c) INI_DF_(0,n,t,c)
+#define INI_DV(n,t,l,m) INI_DV_(0,n,t,l,m)
+#define INI_DS8(n,t) INI_DS_(8,n,t)
+#define INI_DF8(n,t,c) INI_DF_(8,n,t,c)
+#define INI_DSN(n,t) INI_DS_(N,n,t)
+#define INI_DFN(n,t,c) INI_DF_(N,n,t,c)
 	
 struct Ini_FieldInfo
 {
@@ -150,43 +101,15 @@ struct Ini_FieldInfo
 	int size(void) const; Ini_FieldInfo* next() const { return 
 		(Ini_FieldInfo*) this + ((type() >= IniType_Uct) ? 2 : 1); }
 		
-		
 	int getDef(int size) const;
 	DEF_RETPAIR(countSizeObj_t, int, count, int, size );
 	countSizeObj_t countSizeObj(void*& obj) const;
 	countSizeObj_t countSizeObj2(void*& obj) const;
 	
-	
-	
-		
-	
 	void writeField(IniFile_Save* ini, void* obj) const;
 	void writeBlock(IniFile_Save* ini, cch* name, void* obj) const;
-	
-	
-	
-	
 	void readField(char*& str, void* obj) const;
 	void readBlock(IniFile_Load* ini,  cch* name, void* obj) const;
-	
-	
-		
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	//bool writeBlock(IniFile_Save* ini,
-//		cch* name, void* obj);
-//	bool writeBlock(IniFile_Save* ini, 
-	//	cch* name, void* obj, int count);
 };
 
 #endif
