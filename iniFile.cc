@@ -1,5 +1,6 @@
 #include "stdshit.h"
 #include "iniFile.h"
+enum { IniType_DynX = 0x30 };
 
 // stdshit candidates
 TMPL(T) std::make_unsigned_t<T> usn(T val) { return val; }
@@ -253,7 +254,7 @@ Ini_FieldInfo::countSizeObj_t Ini_FieldInfo
 	::countSizeObj(void*& obj) const
 {
 	int size = this->size(); void* fld = this->fld(obj);
-	int count = this->count(); if(type() & IniType_Dyn) { 
+	int count = this->count(); if(type() & IniType_DynX) { 
 	count = vcount(obj); if(count <= 0) return {0,0}; 
 	fld = *(void**)fld; } obj = fld; return {count, size};
 }
@@ -262,7 +263,7 @@ Ini_FieldInfo::countSizeObj_t Ini_FieldInfo
 	::countSizeObj2(void*& obj) const
 {
 	int size = this->size(); void* fld = this->fld(obj);
-	int count = this->count(); if(type() & IniType_Dyn) {
+	int count = this->count(); if(type() & IniType_DynX) {
 		if(vcount(obj) >= vmax()) vcount(obj) = -1;
 		count = vcount(obj); if(count <= 0) return {0,0}; 
 		fld = *(void**)fld = xcalloc(count*size);
@@ -296,7 +297,7 @@ void Ini_FieldInfo::writeField(IniFile_Save* ini, void* obj) const
 
 int Ini_FieldInfo::size(void) const
 {
-	switch(type() & ~IniType_Dyn) {
+	switch(type() & ~IniType_DynX) {
 	case IniType_Byte: case IniType_Bool: return 1;
 	case IniType_Word: return 2; case IniType_Int: 
 	case IniType_Float: case IniType_Hex: return 4; 	
@@ -306,6 +307,14 @@ int Ini_FieldInfo::size(void) const
 
 void Ini_FieldInfo::readField(char*& str_, void* obj) const
 {
+	if(type() & IniType_Dyn2) { char ch = 
+		type2() == IniType_Uct ? ';' : ',';
+		int count = 0; if(str_ && str_[0]) {
+		count++; for(int i = 0; str_[i]; i++)
+			if(str_[i] == ch) count++; }
+		vcount(obj) = count;
+	}
+
 	GET_RETPAIR(int count, int size,
 		countSizeObj2(obj)); if(!size) return;
 	int defVal = this->def(); if(defVal == -2) {

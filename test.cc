@@ -40,6 +40,12 @@ struct TestStruct
 		int arrayLen;
 		char** str; };
 	Test array4xNxSt[4];
+	
+	// array dynamic
+	int arrayLen_32;
+	int* arrayDyn_32;
+	int arrayLen_pg;
+	Paragraph* arrayDyn_pg;
 };
 
 INI_DEFUCT(paragraphTab, TestStruct::Paragraph,
@@ -79,6 +85,9 @@ INI_DEFUCT(testStructTab2, TestStruct,
 	INI_DV(arrayNxSt, Str, arrayLen, -1)
 	
 	INI_DFU(array4xNxSt, 4, TestStructTestTab)
+	
+	INI_DV2(0, arrayDyn_32, Int, arrayLen_32, -1)
+	INI_DV2U(arrayDyn_pg, arrayLen_pg, -1, paragraphTab)
 );
 
 

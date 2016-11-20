@@ -59,7 +59,8 @@ __stdcall char* ini_encStr(cch* str);
 // 
 enum { IniType_None, IniType_Bool, IniType_Byte, IniType_Word,
 	IniType_Int, IniType_Hex, IniType_Float, IniType_Str, 
-	IniType_FStr, IniType_Uct, IniType_Blk, IniType_Dyn = 0x10 };
+	IniType_FStr, IniType_Uct, IniType_Blk, 
+	IniType_Dyn = 0x10, IniType_Dyn2 = 0x20 };
 enum { IniDef_0 = 0, IniDef_N = 192, IniDef_8 = 128 };
 
 #define INI_DEFUCT(name, type, ...) typedef type TMPNAME(cfgType);  \
@@ -68,14 +69,19 @@ enum { IniDef_0 = 0, IniDef_N = 192, IniDef_8 = 128 };
 #define INI_DEF1_(n,t,t2,c,d) INI_DEF0_(#n, (MCAT(IniType_,t) \
 	|MCAT(IniType_,t2)|(c<<8)|MCAT(IniDef_,d)), n)
 
-// basic types
+// basic fixed types
 #define INI_DS_(d,n,t) INI_DEF1_(n,t,None,0,d)
 #define INI_DF_(d,n,t,c) INI_DEF1_(n,t,None,c,d)
-#define INI_DV_(d,n,t,l,m) INI_DEF1_(n,t,Dyn,0,d) INI_DEF0_(0, m, l)
 #define INI_DFB(n,c,s) INI_DEF1_(n,Blk,None,c,0) {(char*)s,0,0},
 #define INI_DFU(n,c,s) INI_DEF1_(n,Uct,None,c,0) {(char*)s,0,0},
+
+// basic dynamic types
+#define INI_DV_(d,n,t,l,m) INI_DEF1_(n,t,Dyn,0,d) INI_DEF0_(0, m, l)
 #define INI_DVB(n,l,m,s) INI_DEF1_(n,Blk,Dyn,0,0) INI_DEF0_((char*)s, m, l)
 #define INI_DVU(n,l,m,s) INI_DEF1_(n,Uct,Dyn,0,0) INI_DEF0_((char*)s, m, l)
+#define INI_DV2(d,n,t,l,m) INI_DEF1_(n,t,Dyn2,0,d) INI_DEF0_(0, m, l)
+#define INI_DV2B(n,l,m,s) INI_DEF1_(n,Blk,Dyn2,0,0) INI_DEF0_((char*)s, m, l)
+#define INI_DV2U(n,l,m,s) INI_DEF1_(n,Uct,Dyn2,0,0) INI_DEF0_((char*)s, m, l)
 
 // derived types
 #define INI_DS(n,t) INI_DS_(0,n,t)
@@ -89,8 +95,8 @@ enum { IniDef_0 = 0, IniDef_N = 192, IniDef_8 = 128 };
 struct Ini_FieldInfo
 {
 	cch* name; WORD vmax_, offset;
-	byte type() const { return vmax_&31; }
-	byte type2() const { return type() & ~IniType_Dyn; }	
+	byte type() const { return vmax_&63; }
+	byte type2() const { return vmax_&15; }
 	byte count() const { return vmax_>>8; }
 	int def() const { return ((s8)vmax_) >> 6; }
 	
