@@ -18,8 +18,8 @@ cstr __stdcall getLine(char*& str) {
 	return {lineBase, lineEnd}; }
 cstr REGCALL(2) removeCrap(cstr str) {
 	auto ptr = str.ptr(); while(ptr.chk()
-		&&(usn(ptr.l()) <= ' ')) ptr.end--;
-	return {ptr.data, ptr.end}; }
+		&&(usn(ptr.l()) <= ' ')) ptr.ld();
+	return {ptr.data, ptr.end()}; }
 DEF_RETPAIR(skipCrap_t, char*, pos, char, ch);
 skipCrap_t __stdcall skipCrap(char* curPos) { char
 	ch; for(; ch = *curPos, inRng(ch, 1, ' ');
@@ -31,7 +31,7 @@ strchr_t __stdcall strchr(cstr str, char ch) { auto
 	ptr.f() == ch) return {ptr.data, str}; } return{}; }
 strchr_t __stdcall strrchr(cstr str, char ch) { auto
 	ptr = str.ptr(); while(ptr.chk()) { if(ptr.ld()
-		== ch) return {ptr.end, str}; } return{}; }
+		== ch) return {ptr.end(), str}; } return{}; }
 	
 	
 #define INIFSERH_(x) if(notErr && ((x) < 0)) notErr = 0; return notErr;
