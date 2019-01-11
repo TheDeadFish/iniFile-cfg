@@ -40,6 +40,8 @@ bool IniFile_Save::fmt(cch* fmt, size_t var) {
 	INIFSERH_( fprintf(fp, fmt, var)); }
 bool IniFile_Save::fmtf(cch* fmt, void* var) { 
 	INIFSERH_( fprintf(fp, fmt, RF(var))); }
+bool IniFile_Save::fmtd(cch* fmt, void* var) { 
+	INIFSERH_( fprintf(fp, fmt, RD(var))); }
 bool IniFile_Save::create(cch* file) {
 	fp = fopen(file, "w"); return (notErr = fp); }
 bool IniFile_Save::close() { if(fclose_ref(fp))
@@ -283,6 +285,7 @@ void Ini_FieldInfo::writeField(IniFile_Save* ini, void* obj) const
 	case IniType_Word: ini->fmt("%d", RW(obj)); break;
 	case IniType_Byte: ini->fmt("%d", RB(obj)); break;
 	case IniType_Float: ini->fmtf("%g", obj); break;
+	case IniType_Double: ini->fmtd("%g", obj); break;
 	case IniType_Hex: ini->fmt("%08X", RI(obj)); break;
 	case IniType_Str: { INI_ENCSTR_(*(cch**)obj);
 		ini->fmt("%s", (size_t)encStr); break; }
@@ -336,9 +339,10 @@ void Ini_FieldInfo::readField(char*& str_, void* obj) const
 		if(str.data == endPtr) tmp = defVal; RI(obj) = tmp; break; }
 	case IniType_Hex: { char* endPtr; int tmp = strtoul(str, &endPtr, 16);
 		if(str.data == endPtr) tmp = defVal; RI(obj) = tmp; break; }
-	case IniType_Float: { char* endPtr; float tmp = strtod(str, &endPtr);
-		if(str.data == endPtr) { tmp = defVal; if(defVal==2) tmp = INFINITY;
-			ei(defVal==3) tmp = -INFINITY; } RF(obj) = tmp; break; }
+	case IniType_Float: case IniType_Double: { char* endPtr; double tmp = 
+		strtod(str, &endPtr); if(str.data == endPtr) { tmp = defVal; 
+		if(defVal==2) tmp = INFINITY; ei(defVal==3) tmp = -INFINITY; }
+		if(type2() == IniType_Double) RD(obj) = tmp; else RF(obj) = tmp; break;}
 	case IniType_Str: { char* tmp = ini_dupStr(str); if(!tmp && 
 		!def()) tmp = xstrdup(""); *(char**)obj = tmp; break; }
 	}} PTRADD(obj, size); } while(--count > 0);

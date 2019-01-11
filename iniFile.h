@@ -17,6 +17,7 @@ struct IniFile_Save
 	
 	bool fmt(cch* fmt, size_t var);
 	bool fmtf(cch* fmt, void* var);
+	bool fmtd(cch* fmt, void* var);
 };
 
 struct IniFile_Load 
@@ -58,10 +59,11 @@ __stdcall char* ini_encStr(cch* str);
 
 // 
 enum { IniType_None, IniType_Bool, IniType_Byte, IniType_Word,
-	IniType_Int, IniType_Hex, IniType_Float, IniType_Str, 
-	IniType_FStr, IniType_Uct, IniType_Blk, 
+	IniType_Int, IniType_Hex, IniType_Float, IniType_Double,
+	IniType_Str, IniType_FStr, IniType_Uct, IniType_Blk, 
 	IniType_Dyn = 0x10, IniType_Dyn2 = 0x20 };
-enum { IniDef_0 = 0, IniDef_N = 192, IniDef_8 = 128 };
+enum { IniDef_0 = 0, IniDef_1 = 64, 
+	IniDef_N = 192, IniDef_8 = 128 };
 
 #define INI_DEFUCT(name, type, ...) typedef type TMPNAME(cfgType);  \
 	const Ini_FieldInfo name[] = {{0,sizeof(type),0}, __VA_ARGS__ {0,0,0}};
@@ -87,6 +89,7 @@ enum { IniDef_0 = 0, IniDef_N = 192, IniDef_8 = 128 };
 #define INI_DS(n,t) INI_DS_(0,n,t)
 #define INI_DF(n,t,c) INI_DF_(0,n,t,c)
 #define INI_DV(n,t,l,m) INI_DV_(0,n,t,l,m)
+#define INI_DS1(n,t) INI_DS_(1,n,t)
 #define INI_DS8(n,t) INI_DS_(8,n,t)
 #define INI_DF8(n,t,c) INI_DF_(8,n,t,c)
 #define INI_DSN(n,t) INI_DS_(N,n,t)
