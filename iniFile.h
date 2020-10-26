@@ -65,9 +65,9 @@ enum { IniType_None, IniType_Bool, IniType_Byte, IniType_Word,
 enum { IniDef_0 = 0, IniDef_1 = 64, 
 	IniDef_N = 192, IniDef_8 = 128 };
 
-#define INI_DEFUCT(name, type, ...) typedef type TMPNAME(cfgType);  \
+#define INI_DEFUCT(name, type, ...)   \
 	const Ini_FieldInfo name[] = {{0,sizeof(type),0}, __VA_ARGS__ {0,0,0}};
-#define INI_DEF0_(n,m,n2) {n, u16(m), offsetof(TMPNAME(cfgType), n2)},
+#define INI_DEF0_(n,m,n2) {n, u16(m), offsetof(INI_TYPE, n2)},
 #define INI_DEF1_(n,t,t2,c,d) INI_DEF0_(#n, (MCAT(IniType_,t) \
 	|MCAT(IniType_,t2)|(c<<8)|MCAT(IniDef_,d)), n)
 

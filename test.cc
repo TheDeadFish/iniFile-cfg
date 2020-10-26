@@ -48,23 +48,28 @@ struct TestStruct
 	Paragraph* arrayDyn_pg;
 };
 
+#define INI_TYPE TestStruct::Paragraph
 INI_DEFUCT(paragraphTab, TestStruct::Paragraph,
 	INI_DS(head, Str) INI_DS(body, Str)
 );
+#undef INI_TYPE
 
-
+#define INI_TYPE TestStruct
 INI_DEFUCT(testStructTab, TestStruct,
 	INI_DS(name, Str) INI_DS(data, Str)
 	INI_DS(desc, Str) INI_DS(nParagraph, Int)
 	INI_DVB(paragraph, nParagraph, -1, paragraphTab)
 );
+#undef INI_TYPE
 
+#define INI_TYPE TestStruct::Test
 INI_DEFUCT(TestStructTestTab, TestStruct::Test,
 	INI_DS(arrayLen, Int)
 	INI_DV(str, Str, arrayLen, -1)
 );
+#undef INI_TYPE
 
-
+#define INI_TYPE TestStruct
 INI_DEFUCT(testStructTab2, TestStruct,
 	INI_DF(array16x8, Byte, 16)
 	INI_DF(array16x16, Word, 16)
@@ -89,6 +94,7 @@ INI_DEFUCT(testStructTab2, TestStruct,
 	INI_DV2(0, arrayDyn_32, Int, arrayLen_32, -1)
 	INI_DV2U(arrayDyn_pg, arrayLen_pg, -1, paragraphTab)
 );
+#undef INI_TYPE
 
 
 
